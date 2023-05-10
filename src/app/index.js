@@ -8,21 +8,22 @@
  */
 
 // imports modules & dependencies
-const express = require('express');
-const favicon = require('serve-favicon');
-const crossOrigin = require('cors');
-const cookieParser = require('cookie-parser');
-const appRoot = require('app-root-path');
-const bodyParser = require('body-parser');
-const helmet = require('helmet');
-const env = require('dotenv');
+const express = require("express");
+const favicon = require("serve-favicon");
+const crossOrigin = require("cors");
+const cookieParser = require("cookie-parser");
+const appRoot = require("app-root-path");
+const bodyParser = require("body-parser");
+const helmet = require("helmet");
+const env = require("dotenv");
 
 // imports application middleware and routes
-const morganLogger = require('../middleware/morgan.logger');
-const defaultController = require('../controllers/default.controller');
-const { notFoundRoute, errorHandler } = require('../middleware/error.handler');
-const { limiter } = require('../middleware/access.limiter');
-const corsOptions = require('../configs/cors.config');
+const morganLogger = require("../middleware/morgan.logger");
+const defaultController = require("../controllers/default.controller");
+const { notFoundRoute, errorHandler } = require("../middleware/error.handler");
+const { limiter } = require("../middleware/access.limiter");
+const corsOptions = require("../configs/cors.config");
+const authRoute = require("../routes/auth.routes");
 
 // load environment variables from .env file
 env.config();
@@ -34,17 +35,17 @@ const app = express();
 app.use(limiter);
 
 // application database connection establishment
-const connectDatabase = require('../database/connect.mongo.db');
+const connectDatabase = require("../database/connect.mongo.db");
 
 connectDatabase();
 
 // HTTP request logger middleware
-if (process.env.APP_NODE_ENV !== 'production') {
+if (process.env.APP_NODE_ENV !== "production") {
   app.use(morganLogger());
 }
 
 // secure HTTP headers setting middleware
-app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
 // allow cross-origin resource sharing
 app.use(crossOrigin(corsOptions));
@@ -57,12 +58,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // sets favicon in API routes
-if (process.env.APP_NODE_ENV !== 'production') {
+if (process.env.APP_NODE_ENV !== "production") {
   app.use(favicon(`${appRoot}/public/favicon.ico`));
 }
 
 // sets static folder
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 // parse requests of content-type ~ application/json
 app.use(express.json());
@@ -71,8 +72,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // response default (welcome) route
-app.get('/', defaultController);
+app.get("/", defaultController);
 
+// sets application API's routes
+app.use("/api/v1", authRoute); // auth routes
 
 // 404 ~ not found error handler
 app.use(notFoundRoute);
