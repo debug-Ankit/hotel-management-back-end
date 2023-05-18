@@ -24,6 +24,7 @@ const { notFoundRoute, errorHandler } = require("../middleware/error.handler");
 const { limiter } = require("../middleware/access.limiter");
 const corsOptions = require("../configs/cors.config");
 const authRoute = require("../routes/auth.routes");
+const userRoute = require('../routes/user.routes');
 
 // load environment variables from .env file
 env.config();
@@ -76,6 +77,7 @@ app.get("/", defaultController);
 
 // sets application API's routes
 app.use("/api/v1", authRoute); // auth routes
+app.use('/api/v1', userRoute); // user routes
 
 // 404 ~ not found error handler
 app.use(notFoundRoute);
